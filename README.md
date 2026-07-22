@@ -22,14 +22,14 @@ Inside Claude Code:
 
 ```
 /plugin marketplace add dadiogaosai/gogodev
-/plugin install gogodev@waniyama
+/plugin install gogodev@dadiogaosai
 ```
 
 Or from the terminal:
 
 ```bash
 claude plugin marketplace add dadiogaosai/gogodev
-claude plugin install gogodev@waniyama
+claude plugin install gogodev@dadiogaosai
 ```
 
 Then:
@@ -43,14 +43,14 @@ To try the plugin from a local clone instead of GitHub, point the marketplace at
 ## Update
 
 ```bash
-claude plugin marketplace update waniyama   # refresh the marketplace's view of the repo
-claude plugin update gogodev@waniyama       # update the plugin itself
+claude plugin marketplace update dadiogaosai   # refresh the marketplace's view of the repo
+claude plugin update gogodev@dadiogaosai       # update the plugin itself
 ```
 
 Then restart Claude Code to apply. Note that `update` only acts when the version in `plugin.json` has *increased*; for a same-version refresh (e.g. tracking a local clone), reinstall instead:
 
 ```bash
-claude plugin uninstall gogodev@waniyama && claude plugin install gogodev@waniyama
+claude plugin uninstall gogodev@dadiogaosai && claude plugin install gogodev@dadiogaosai
 ```
 
 Dependency plugins update independently: `claude plugin update mattpocock-skills@mattpocock` and `claude plugin update modern-go-guidelines@goland-claude-marketplace` — or update everything at once from the `/plugin` menu.
