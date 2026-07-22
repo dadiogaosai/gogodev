@@ -21,14 +21,14 @@ The rule that holds it together: **Matt's process, OpenSpec's artifacts.** Every
 Inside Claude Code:
 
 ```
-/plugin marketplace add Waniyama/gogodev
+/plugin marketplace add dadiogaosai/gogodev
 /plugin install gogodev@waniyama
 ```
 
 Or from the terminal:
 
 ```bash
-claude plugin marketplace add Waniyama/gogodev
+claude plugin marketplace add dadiogaosai/gogodev
 claude plugin install gogodev@waniyama
 ```
 
