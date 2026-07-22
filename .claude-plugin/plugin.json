@@ -1,0 +1,46 @@
+{
+  "name": "gogodev",
+  "version": "0.1.0",
+  "description": "Work Matt Pocock's way, ship OpenSpec artifacts: grill-me interviews feed OpenSpec change proposals, and implement/tdd drive OpenSpec task lists.",
+  "author": {
+    "name": "Waniyama"
+  },
+  "repository": "https://github.com/Waniyama/gogodev",
+  "license": "MIT",
+  "keywords": [
+    "openspec",
+    "grilling",
+    "spec-driven",
+    "tdd",
+    "workflow"
+  ],
+  "dependencies": [
+    {
+      "name": "mattpocock-skills",
+      "marketplace": "mattpocock"
+    },
+    {
+      "name": "modern-go-guidelines",
+      "marketplace": "goland-claude-marketplace"
+    }
+  ],
+  "commands": [
+    "./commands/propose.md",
+    "./commands/capture.md",
+    "./commands/apply.md",
+    "./commands/setup.md"
+  ],
+  "skills": [
+    "./skills/grill-before-openspec",
+    "./skills/go-semantic-search"
+  ],
+  "lspServers": {
+    "go": {
+      "command": "gopls",
+      "args": ["serve"],
+      "extensionToLanguage": {
+        ".go": "go"
+      }
+    }
+  }
+}

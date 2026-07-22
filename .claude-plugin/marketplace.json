@@ -1,0 +1,22 @@
+{
+  "name": "waniyama",
+  "owner": {
+    "name": "Waniyama"
+  },
+  "description": "Glue between Matt Pocock's engineering skills and the OpenSpec spec-driven workflow.",
+  "plugins": [
+    {
+      "name": "gogodev",
+      "source": "./",
+      "description": "Work Matt Pocock's way, ship OpenSpec artifacts: grill-me interviews feed OpenSpec change proposals, and implement/tdd drive OpenSpec task lists.",
+      "category": "engineering",
+      "keywords": [
+        "openspec",
+        "grilling",
+        "spec-driven",
+        "tdd",
+        "workflow"
+      ]
+    }
+  ]
+}
