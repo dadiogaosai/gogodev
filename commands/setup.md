@@ -72,4 +72,4 @@ gopls powers this plugin's Go integration: the LSP server registration, the go-s
 
 Print a checklist of the four dependencies with pass/fixed/skipped status.
 
-If anything was installed in Check 1, tell the user: **restart Claude Code** — newly installed plugins (and their skills) only load on the next session, so `/gogodev:propose` will not find `grill-me` until then.
+If anything was installed in Check 1, tell the user: **restart Claude Code** — newly installed plugins (and their skills) only load on the next session, so `/gogodev:propose` will not find `grilling` until then.

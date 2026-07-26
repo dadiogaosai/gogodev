@@ -1,17 +1,17 @@
 ---
-description: Grill the idea with a grill-me interview, then write it up as an OpenSpec change proposal
+description: Grill the idea with a grilling interview, then write it up as an OpenSpec change proposal
 argument-hint: [idea or change description]
 ---
 
 Create an OpenSpec change proposal for: $ARGUMENTS
 
-This command replaces OpenSpec's stock elicitation with a relentless grill-me interview. The interview comes FIRST; OpenSpec artifacts are only written once the idea has survived it.
+This command replaces OpenSpec's stock elicitation with a relentless grilling interview. The interview comes FIRST; OpenSpec artifacts are only written once the idea has survived it.
 
 ## Step 0: Dependency check
 
 Verify, in order:
 
-1. The `grill-me` skill (from the `mattpocock-skills` plugin) is available in your skills listing.
+1. The `grilling` skill (from the `mattpocock-skills` plugin) is available in your skills listing.
 2. The `openspec` CLI responds (`openspec --version`).
 3. An OpenSpec root exists (an `openspec/config.yaml` reachable from the working directory — check with `openspec context 2>/dev/null` or look for the file).
 
@@ -19,7 +19,7 @@ If any check fails, STOP and tell the user to run `/gogodev:setup` first. Do not
 
 ## Step 1: Grill the idea
 
-Run a `/grill-me` session (the `mattpocock-skills:grill-me` skill) about the idea in $ARGUMENTS. If no idea was given, first ask what change they want to make.
+Run a grilling session (the `mattpocock-skills:grilling` skill) about the idea in $ARGUMENTS. If no idea was given, first ask what change they want to make.
 
 Follow that skill's rules strictly: one question at a time, a recommended answer for each, look up facts in the environment yourself, put every decision to the user. Walk every branch until you reach shared understanding, and get explicit confirmation of the summarized understanding.
 
