@@ -34,7 +34,7 @@ claude plugin install gogodev@dadiogaosai
 
 Then:
 
-1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain.
+1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain. Prefer the terminal? `./scripts/install.sh` runs the same checks outside a Claude session — handy for onboarding a new machine or CI.
 2. Restart Claude Code — commands, skills, and hooks load at session start.
 3. In each repo where you'll use it, run `/gogodev:setup` again to initialize OpenSpec (`openspec init`).
 
