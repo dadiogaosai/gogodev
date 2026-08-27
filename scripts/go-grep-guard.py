@@ -50,7 +50,7 @@ def in_go_project(start):
         path = parent
 
 
-GO_KEYWORD_HUNT = re.compile(r"^\\?b?\(?(func|type|var|const|interface|struct)\b")
+GO_KEYWORD_HUNT = re.compile(r"^(\\b)?\(?(func|type|var|const|interface|struct)\b")
 BARE_IDENT = re.compile(r"^(\\b)?[A-Za-z_][A-Za-z0-9_]*(\\b)?$")
 CALL_HUNT = re.compile(r"^(\\b)?[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?\\?\($")
 
