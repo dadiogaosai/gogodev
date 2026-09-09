@@ -19,8 +19,7 @@ if has_plugin "mattpocock-skills"; then
   echo "already installed"
   STATUS_MATTPOCOCK="present"
 else
-  claude plugin marketplace add mattpocock/skills || true
-  claude plugin install mattpocock-skills@mattpocock
+  claude plugin install mattpocock-skills@claude-plugins-official
   STATUS_MATTPOCOCK="installed"
 fi
 

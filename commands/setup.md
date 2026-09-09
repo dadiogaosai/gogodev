@@ -12,14 +12,13 @@ Check whether the `mattpocock-skills` plugin is installed:
 claude plugin list 2>/dev/null | grep -i mattpocock
 ```
 
-If missing, install it (user-scope, so it follows you across repos):
+If missing, install it (user-scope, so it follows you across repos) from Anthropic's official marketplace — pre-added by default, no `marketplace add` needed:
 
 ```bash
-claude plugin marketplace add mattpocock/skills
-claude plugin install mattpocock-skills@mattpocock
+claude plugin install mattpocock-skills@claude-plugins-official
 ```
 
-If the marketplace already exists, `marketplace add` may error harmlessly — continue to the install step.
+Matt Pocock recommends installing from this official marketplace rather than his own `mattpocock/skills` repo marketplace.
 
 Do the same for JetBrains' modern Go guidelines plugin (part of this plugin's Go layer):
 

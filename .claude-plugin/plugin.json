@@ -1,6 +1,6 @@
 {
   "name": "gogodev",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Work Matt Pocock's way, ship OpenSpec artifacts: grill-me interviews feed OpenSpec change proposals, and implement/tdd drive OpenSpec task lists.",
   "author": {
     "name": "Waniyama"
@@ -17,7 +17,7 @@
   "dependencies": [
     {
       "name": "mattpocock-skills",
-      "marketplace": "mattpocock"
+      "marketplace": "claude-plugins-official"
     },
     {
       "name": "modern-go-guidelines",

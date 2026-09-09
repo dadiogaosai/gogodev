@@ -53,7 +53,7 @@ Then restart Claude Code to apply. Note that `update` only acts when the version
 claude plugin uninstall gogodev@dadiogaosai && claude plugin install gogodev@dadiogaosai
 ```
 
-Dependency plugins update independently: `claude plugin update mattpocock-skills@mattpocock` and `claude plugin update modern-go-guidelines@goland-claude-marketplace` — or update everything at once from the `/plugin` menu.
+Dependency plugins update independently: `claude plugin update mattpocock-skills@claude-plugins-official` and `claude plugin update modern-go-guidelines@goland-claude-marketplace` — or update everything at once from the `/plugin` menu.
 
 ## Commands
 
