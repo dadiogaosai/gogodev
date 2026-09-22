@@ -5,8 +5,10 @@ set -euo pipefail
 
 STATUS_MATTPOCOCK="skipped"
 STATUS_MODERN_GO="skipped"
+STATUS_OPEN_CODE_REVIEW="skipped"
 STATUS_OPENSPEC="skipped"
 STATUS_GOPLS="skipped"
+STATUS_OCR="skipped"
 
 log() { printf '\n== %s ==\n' "$1"; }
 
@@ -31,6 +33,16 @@ else
   claude plugin marketplace add JetBrains/go-modern-guidelines || true
   claude plugin install modern-go-guidelines@goland-claude-marketplace
   STATUS_MODERN_GO="installed"
+fi
+
+log "Alibaba OpenCodeReview plugin"
+if has_plugin "open-code-review"; then
+  echo "already installed"
+  STATUS_OPEN_CODE_REVIEW="present"
+else
+  claude plugin marketplace add alibaba/open-code-review || true
+  claude plugin install open-code-review@open-code-review
+  STATUS_OPEN_CODE_REVIEW="installed"
 fi
 
 log "OpenSpec CLI"
@@ -61,13 +73,24 @@ else
   fi
 fi
 
+log "ocr CLI (only needed for /gogodev:apply's loop mode)"
+if command -v ocr >/dev/null 2>&1; then
+  echo "already installed"
+  STATUS_OCR="present (run 'ocr config provider' / 'ocr config model' if not configured yet)"
+else
+  npm install -g @alibaba-group/open-code-review
+  STATUS_OCR="installed (run 'ocr config provider' / 'ocr config model' before first use)"
+fi
+
 log "Summary"
 printf '%-28s %s\n' "mattpocock-skills:" "$STATUS_MATTPOCOCK"
 printf '%-28s %s\n' "modern-go-guidelines:" "$STATUS_MODERN_GO"
+printf '%-28s %s\n' "open-code-review:" "$STATUS_OPEN_CODE_REVIEW"
 printf '%-28s %s\n' "openspec CLI:" "$STATUS_OPENSPEC"
 printf '%-28s %s\n' "gopls:" "$STATUS_GOPLS"
+printf '%-28s %s\n' "ocr CLI:" "$STATUS_OCR"
 
-if [[ "$STATUS_MATTPOCOCK" == "installed" || "$STATUS_MODERN_GO" == "installed" ]]; then
+if [[ "$STATUS_MATTPOCOCK" == "installed" || "$STATUS_MODERN_GO" == "installed" || "$STATUS_OPEN_CODE_REVIEW" == "installed" ]]; then
   echo
   echo "Restart Claude Code — newly installed plugins only load on the next session."
 fi

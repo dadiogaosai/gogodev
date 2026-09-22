@@ -56,6 +56,7 @@ Then write the artifact **from the grilling transcript**, not from scratch:
   - Size each task to fit a single fresh context window.
   - Any prefactoring ("make the change easy, then make the easy change") comes first.
   - Note blocking edges inline where order matters: `- [ ] Wire X into Y (blocked by: task 2)`. A task with no blockers can start immediately.
+  - A task that's inherently manual — a human has to do it (dashboard clicks, external approvals, credential rotation), not something an agent can execute — is tagged inline: `- [ ] Rotate the prod API key (manual)`. `/gogodev:apply`'s `loop` mode uses this tag to skip such tasks.
   - **Wide refactors** (one mechanical change with a codebase-wide blast radius) are the exception to vertical slicing: sequence them as expand → migrate in batches → contract, each batch its own task blocked by the expand.
 
 The user already answered the hard questions — do NOT re-ask things settled during grilling, and do NOT invent decisions that were never discussed. If writing an artifact reveals a genuine gap, ask one targeted follow-up question rather than guessing.

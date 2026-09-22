@@ -13,7 +13,7 @@ The rule that holds it together: **Matt's process, OpenSpec's artifacts.** Every
 ## What's in the box
 
 - **Proposal flow** — a relentless interview *before* any artifact exists; artifacts written from the interview, not from a one-shot description.
-- **Implementation flow** — Matt's `implement`/`tdd` skills driving OpenSpec's `tasks.md`, with the bookkeeping kept honest.
+- **Implementation flow** — Matt's `implement`/`tdd` skills driving OpenSpec's `tasks.md`, with the bookkeeping kept honest. A third, stricter `loop` mode adds mandatory TDD, a lint+typecheck+test gate, a dual code review, and a human-approval gate before a single commit — see below.
 - **Go layer** — gopls-first code search (enforced by a hook), JetBrains' modern Go guidelines, and gopls LSP diagnostics.
 
 ## Install
@@ -34,7 +34,7 @@ claude plugin install gogodev@dadiogaosai
 
 Then:
 
-1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain. Prefer the terminal? `./scripts/install.sh` runs the same checks outside a Claude session — handy for onboarding a new machine or CI.
+1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`, Alibaba's `open-code-review`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain, and offers to install the `ocr` CLI (only needed for `loop` mode). Prefer the terminal? `./scripts/install.sh` runs the same checks outside a Claude session — handy for onboarding a new machine or CI.
 2. Restart Claude Code — commands, skills, and hooks load at session start.
 3. In each repo where you'll use it, run `/gogodev:setup` again to initialize OpenSpec (`openspec init`).
 
@@ -53,7 +53,7 @@ Then restart Claude Code to apply. Note that `update` only acts when the version
 claude plugin uninstall gogodev@dadiogaosai && claude plugin install gogodev@dadiogaosai
 ```
 
-Dependency plugins update independently: `claude plugin update mattpocock-skills@claude-plugins-official` and `claude plugin update modern-go-guidelines@goland-claude-marketplace` — or update everything at once from the `/plugin` menu.
+Dependency plugins update independently: `claude plugin update mattpocock-skills@claude-plugins-official`, `claude plugin update modern-go-guidelines@goland-claude-marketplace`, and `claude plugin update open-code-review@open-code-review` — or update everything at once from the `/plugin` menu.
 
 ## Commands
 
@@ -61,10 +61,19 @@ Dependency plugins update independently: `claude plugin update mattpocock-skills
 | --- | --- |
 | `/gogodev:propose <idea>` | Runs a `/grill-me` interview first. Only if the idea survives: `openspec new change`, then `proposal.md` / `design.md` / `tasks.md` written from the interview, validated. A killed idea writes nothing. |
 | `/gogodev:capture [name]` | No-interview counterpart for designs that emerged organically in the session (Matt's `to-spec` rules): synthesize the conversation into an OpenSpec change — re-asking nothing, inventing nothing. One permitted check-in: the testing seams. |
-| `/gogodev:apply [change]` | Implements an approved change. Asks once per change — `tdd` or `implement`? (recorded in `design.md`) — then works `tasks.md`, ticking checkboxes one at a time. Ends with `/code-review`; suggests archiving (slash command or `openspec archive` CLI, whichever is loaded). |
-| `/gogodev:setup` | Installs the dependency plugins, checks the `openspec` CLI, offers `openspec init --tools claude`, installs gopls when a Go toolchain exists. |
+| `/gogodev:apply [change]` | Implements an approved change. Asks once per change — `tdd`, `implement`, or `loop`? (recorded in `design.md`) — then works `tasks.md`, ticking checkboxes one at a time. `tdd`/`implement` end with `/code-review` and a commit; `loop` runs its own stricter cycle (below) ending in a human-approved commit. Suggests archiving (slash command or `openspec archive` CLI, whichever is loaded). |
+| `/gogodev:setup` | Installs the dependency plugins, checks the `openspec` CLI, offers `openspec init --tools claude`, installs gopls when a Go toolchain exists, and offers the `ocr` CLI for `loop` mode. |
 
-Tasks in `tasks.md` are written as **tracer bullets** (Matt's `to-tickets` discipline): vertical slices that are individually demoable, sized to one context window, with blocking edges noted — and expand–contract sequencing for wide refactors.
+Tasks in `tasks.md` are written as **tracer bullets** (Matt's `to-tickets` discipline): vertical slices that are individually demoable, sized to one context window, with blocking edges noted, an optional `(manual)` tag for human-only tasks, and expand–contract sequencing for wide refactors.
+
+## `loop` mode
+
+A third, opt-in execution mode for `/gogodev:apply`, for changes you want to run with minimal check-ins:
+
+- Per non-manual task, in order: write failing tests (mandatory TDD), implement under the [ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
+- Once every task's gate has passed, review the whole change once: `mattpocock-skills:code-review` (Standards+Spec) and [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance) run in parallel; findings are merged, deduped, and route back to just the task(s) they concern.
+- Clean review → a human-approval gate (a brief: time taken, review rounds, findings and fixes, a pointer to the full diff) → one commit for the whole change.
+- No fixed retry cap — only a stall detector (the same failure or finding recurring unchanged) stops the loop short of success, leaving the working tree uncommitted for inspection.
 
 ## Safety net
 
