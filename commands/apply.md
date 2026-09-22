@@ -73,62 +73,34 @@ If all tasks are complete, suggest archiving to fold the change into the main sp
 
 This replaces Step 4 and Step 5 completely — do not run those for `loop` mode. Requires the `open-code-review` plugin's `ocr` CLI (`/gogodev:setup` Check 5). If `ocr` isn't on PATH, STOP and point the user there.
 
-### 4-loop.a: Classify tasks
+`loop` mode's whole point is to run with minimal check-ins, so the autonomous work is delegated to a background subagent — this session only launches it and handles the one human-approval checkpoint at the end. Never run the per-task cycle or the review inline in this session; that would defeat the purpose and flood this session's context with every task's test/gate output.
 
-For each task in `tasks.md`, decide whether it's manual (not agent-executable — dashboard clicks, external approvals, credential rotation, anything outside the codebase):
+### 4-loop.a: Launch the implementation subagent
 
-- Prefer an explicit `(manual)` tag at the end of the task line, e.g. `- [ ] Rotate the prod API key (manual)`.
-- For untagged tasks (common in changes a colleague wrote with plain OpenSpec, no tag convention), judge from the description.
+Launch a subagent via the Agent tool with `subagent_type: "fork"` — it inherits this session's already-loaded OpenSpec context (Steps 1–2) for free, runs in the background, and keeps its tool output out of this session's context. Tell the user it's running in the background and they can keep working; do not poll for progress — wait for its completion notification.
 
-Manual tasks are excluded from the cycle below. Leave their checkboxes unticked — they're the human's to do and tick themselves.
+Give the fork this brief, in full (it must be self-contained and unambiguous even though it inherits context):
 
-### 4-loop.b: Per-task cycle
+> Work through `<change name>`'s `tasks.md` autonomously. Do not commit at any point — a human approves and commits after you report back.
+>
+> **1. Classify tasks.** For each task, decide whether it's manual (not agent-executable — dashboard clicks, external approvals, credential rotation, anything outside the codebase): prefer an explicit `(manual)` tag at the end of the task line (e.g. `- [ ] Rotate the prod API key (manual)`); for untagged tasks, judge from the description. Manual tasks are excluded from the cycle below — leave their checkboxes unticked, they're the human's to do and tick themselves.
+>
+> **2. Per-task cycle**, for each non-manual, unticked task, in order:
+>    1. Write failing tests for the task. Mandatory — no implement-only path.
+>    2. Implement, applying the [ponytail](https://github.com/DietrichGebert/ponytail) ladder throughout — stop at the first rung that solves the problem: (1) does it need to exist at all? skip speculative needs — (2) already in this codebase? reuse it — (3) does stdlib cover it? — (4) a native platform feature (CSS over JS, a DB constraint over app logic)? — (5) an already-installed dependency? never add a new one for a few lines — (6) a one-liner? — (7) minimal working code, only then. Fix bugs at the root cause / shared layer, never just in the caller that tripped on it. Never simplify away input validation, error handling, security, or accessibility. Mark any deliberate corner-cutting with a `ponytail:` comment naming the ceiling and the upgrade path.
+>    3. Gate: run the project's lint, typecheck, and test commands (detect from its tooling — `package.json` scripts, `Makefile`, etc.). Fail → back to step 1/2 for this task, unless this failure is materially the same as the previous attempt's (same error, nothing changed) — then stop, this is a stall (see below). Pass → tick this task's checkbox immediately (never batch-tick), move to the next task.
+>
+> **3. Review the whole change once every non-manual task's checkbox is ticked.** Run in parallel: `mattpocock-skills:code-review` (Standards + Spec) against the change's fixed point, and OpenCodeReview via `ocr review --audience agent` (workspace mode, the uncommitted diff directly — call the CLI directly, not the plugin's packaged `/review` command, which decides on its own whether to apply fixes). Merge and dedupe both reports into one findings list. Any findings → for each affected task, un-tick its checkbox, redo step 2 for just that task, then review again — unless a review round surfaces materially the same finding as the previous round with nothing changed, which is also a stall. Clean → done.
+>
+> **4. Report back.** If you stopped on a stall: report what was tried and why it's stuck, and leave the working tree exactly as the last attempt left it, uncommitted. If review came back clean: report total time taken, how many review→fix rounds ran, the findings from each round and what was fixed, and confirm the working tree is uncommitted and ready for human approval.
 
-For each non-manual, unticked task, in order:
+### 4-loop.b: Human gate
 
-1. **Write failing tests** for the task. Mandatory in `loop` mode — there is no implement-only path here, unlike `tdd`/`implement` modes.
-2. **Implement**, applying the [ponytail](https://github.com/DietrichGebert/ponytail) ladder throughout — stop at the first rung that solves the problem:
-   1. Does it need to exist at all? (skip speculative needs)
-   2. Already in this codebase? (reuse existing helpers/patterns)
-   3. Does stdlib cover it?
-   4. A native platform feature (CSS over JS, a DB constraint over app logic)?
-   5. An already-installed dependency? (never add a new one for a few lines)
-   6. A one-liner?
-   7. Minimal working code — only then.
+When the subagent's completion notification arrives:
 
-   Fix bugs at the root cause / shared layer, never just in the caller that happened to trip on it. Never simplify away input validation, error handling, security, or accessibility. If you deliberately cut a corner, mark it with a `ponytail:` comment naming the ceiling and the upgrade path.
-3. **Gate**: run the project's lint, typecheck, and test commands (detected from its tooling — `package.json` scripts, `Makefile`, etc. — the same way `implement`/`tdd` already do).
-   - **Fail** → back to step 1/2 for this same task.
-   - **Stall check**: if this failure is materially the same as the previous attempt's failure on this task (same error, nothing changed), STOP — see "Stopping" below.
-   - **Pass** → tick this task's checkbox immediately (never batch-tick), move to the next task.
-
-### 4-loop.c: Review the whole change (once every non-manual task's checkbox is ticked)
-
-Run in parallel:
-
-- `mattpocock-skills:code-review` (Standards + Spec) against the change's fixed point.
-- OpenCodeReview: `ocr review --audience agent` — workspace mode, reviewing the uncommitted diff directly. Do not use the plugin's packaged `/review` command as-is (it decides on its own whether to apply fixes); run the CLI directly and treat its structured findings the same way as `code-review`'s.
-
-Merge and dedupe both reports into one findings list.
-
-- **Any findings** → for each affected task: un-tick its checkbox, redo 4-loop.b (tests → implement → gate) for just that task, then come back here and review again.
-  - **Stall check**: if a review round surfaces materially the same finding as the previous round with nothing changed, STOP — see "Stopping" below.
-- **Clean** → continue to 4-loop.d.
-
-### 4-loop.d: Human gate
-
-Ask the user (AskUserQuestion) with a brief containing:
-
-- Total time the implementation took this session.
-- How many review→fix rounds ran.
-- The findings from each round and what was fixed for each.
-- A pointer to the full diff (`git diff <fixed-point>...HEAD`) rather than the diff dumped inline — large multi-task changes don't fit in a brief.
-
-- **Changes requested** → same targeted reopen as 4-loop.c's findings path.
-- **Approved** → commit. This is the loop's only commit for the whole change — nothing commits before this point.
+- **It stalled** → relay its report to the user as-is (what was tried, why it's stuck, the tree left uncommitted for inspection). `loop` mode ends here; there's nothing to approve.
+- **It came back clean** → ask the user (AskUserQuestion) with a brief built from its report: total time, review→fix round count, findings and fixes per round, and a pointer to the full diff (`git diff <fixed-point>...HEAD`) rather than the diff dumped inline — large multi-task changes don't fit in a brief.
+  - **Changes requested** → `SendMessage` the *same* subagent, naming which task(s) to reopen and why; wait for its next report; re-run this step when it arrives.
+  - **Approved** → commit now, in this session, against the working tree the subagent left. This is the loop's only commit for the whole change — nothing commits before this point.
 
 If all tasks are complete after commit, suggest archiving exactly as Step 5 does for `tdd`/`implement` mode.
-
-### Stopping
-
-There is no fixed retry limit anywhere in `loop` mode — a stall (the same failure or finding recurring with no material change) is the only thing that stops it short of success. On a stall: report to the user what was tried and why it's stuck, and leave the working tree exactly as the last attempt left it — uncommitted, for inspection.

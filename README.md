@@ -68,12 +68,12 @@ Tasks in `tasks.md` are written as **tracer bullets** (Matt's `to-tickets` disci
 
 ## `loop` mode
 
-A third, opt-in execution mode for `/gogodev:apply`, for changes you want to run with minimal check-ins:
+A third, opt-in execution mode for `/gogodev:apply`, for changes you want to run with minimal check-ins. The autonomous work runs in a background subagent, not this session — you get pulled back in only for the one human-approval checkpoint at the end:
 
-- Per non-manual task, in order: write failing tests (mandatory TDD), implement under the [ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
-- Once every task's gate has passed, review the whole change once: `mattpocock-skills:code-review` (Standards+Spec) and [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance) run in parallel; findings are merged, deduped, and route back to just the task(s) they concern.
-- Clean review → a human-approval gate (a brief: time taken, review rounds, findings and fixes, a pointer to the full diff) → one commit for the whole change.
-- No fixed retry cap — only a stall detector (the same failure or finding recurring unchanged) stops the loop short of success, leaving the working tree uncommitted for inspection.
+- The subagent works per non-manual task, in order: write failing tests (mandatory TDD), implement under the [ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
+- Once every task's gate has passed, it reviews the whole change once: `mattpocock-skills:code-review` (Standards+Spec) and [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance) run in parallel; findings are merged, deduped, and route back to just the task(s) they concern. It never commits.
+- Clean review → the subagent reports back and your session opens a human-approval gate (a brief: time taken, review rounds, findings and fixes, a pointer to the full diff). Changes requested resume the same subagent; approval commits once, in your session, against the tree it left.
+- No fixed retry cap — only a stall detector (the same failure or finding recurring unchanged) stops the subagent short of success, leaving the working tree uncommitted for inspection.
 
 ## Safety net
 
