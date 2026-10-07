@@ -34,7 +34,7 @@ claude plugin install gogodev@dadiogaosai
 
 Then:
 
-1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`, Alibaba's `open-code-review`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain, and offers to install the `ocr` CLI (only needed for `loop` mode). Prefer the terminal? `./scripts/install.sh` runs the same checks outside a Claude session — handy for onboarding a new machine or CI.
+1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`, Alibaba's `open-code-review`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. For `loop`, it installs the `open-code-review-delegate` skill and offers the `ocr` CLI. It also installs gopls if you have a Go toolchain. Prefer the terminal? `./scripts/install.sh` installs these plus Ponytail outside a Claude session — handy for onboarding a new machine or CI.
 2. Restart Claude Code — commands, skills, and hooks load at session start.
 3. In each repo where you'll use it, run `/gogodev:setup` again to initialize OpenSpec (`openspec init`).
 
@@ -49,7 +49,7 @@ curl -fsSLo install-codex.sh https://raw.githubusercontent.com/dadiogaosai/gogod
 bash install-codex.sh
 ```
 
-It installs gogodev, Matt Pocock's four workflow skills globally, the JetBrains and Alibaba plugins, OpenSpec, gopls when Go is available, and the `ocr` CLI. It skips dependencies already present and leaves OpenSpec initialization to each target repo. Start a new Codex session after installation. From a gogodev checkout, you can run `./scripts/install-codex.sh` instead.
+It installs gogodev, Matt Pocock's four workflow skills globally, the JetBrains, Alibaba, and Ponytail plugins, OpenSpec, gopls when Go is available, and the `ocr` CLI. It skips dependencies already present and leaves OpenSpec initialization to each target repo. Start a new Codex session after installation. From a gogodev checkout, you can run `./scripts/install-codex.sh` instead.
 
 To install the components manually, start with gogodev:
 
@@ -71,34 +71,31 @@ For Matt Pocock's original interview, TDD, implementation, and review guidance, 
 npx skills@latest add mattpocock/skills
 ```
 
-For `loop` mode, install and configure OpenCodeReview's `ocr` CLI:
+For `loop` mode, install OpenCodeReview's `ocr` CLI. Its delegation workflow uses the host agent for the review, so no OCR provider, model, or API key is needed:
 
 ```bash
 npm install -g @alibaba-group/open-code-review
-ocr config provider
-ocr config model
-ocr llm test
 ```
 
-Gogodev calls `ocr` directly so it can combine its findings with Matt's Standards and Spec review. Alibaba also offers an optional [Codex plugin](https://github.com/alibaba/open-code-review/blob/main/plugins/open-code-review/README.md) for standalone reviews:
+Gogodev uses the [OpenCodeReview delegation skill](https://github.com/alibaba/open-code-review/blob/main/skills/open-code-review-delegate/SKILL.md) to combine the host agent's review with Matt's Standards and Spec review. The Codex plugin provides that skill; the installer includes it. For a manual installation:
 
 ```bash
 codex plugin marketplace add alibaba/open-code-review
 codex plugin add open-code-review-codex@open-code-review
 ```
 
-[Ponytail](https://github.com/DietrichGebert/ponytail) has an optional Codex plugin for its full, session-wide behavior:
+The installer includes [Ponytail](https://github.com/DietrichGebert/ponytail). For a manual Codex installation:
 
 ```bash
 codex plugin marketplace add DietrichGebert/ponytail
 codex plugin add ponytail@ponytail
 ```
 
-After installing Ponytail, review and trust its hooks through `/hooks` in Codex, then start a new session. Gogodev's `loop` skill includes Ponytail's minimal-code ladder even when the separate plugin is absent.
+After installing Ponytail, review and trust its hooks through `/hooks` in Codex, then start a new session. Gogodev's `loop` skill also includes Ponytail's minimal-code ladder.
 
 Start a new Codex session, then invoke the bundled skills as `$gogodev-setup`, `$gogodev-propose`, `$gogodev-capture`, and `$gogodev-apply` (for example, “Use $gogodev-propose to explore this idea”). The existing `go-semantic-search` and `grill-before-openspec` skills are included too. Codex loads these as skills, not Claude's `/gogodev:*` slash commands. Run `$gogodev-setup` in each target repository to check OpenSpec and initialize it with `openspec init --tools codex` when needed.
 
-The Codex skills contain fallback interview, task, and review procedures. They use Matt's interview and TDD skills where applicable; his `implement` and `code-review` instructions are adapted to OpenSpec's task ledger and the uncommitted review gate. They do not require Claude marketplace dependencies. `loop` mode requires the `ocr` CLI and its configured provider. The Claude grep guard and gopls LSP registration are Claude-only; in Codex, `go-semantic-search` guides gopls use without a blocking hook.
+The Codex skills contain fallback interview, task, and review procedures. They use Matt's interview and TDD skills where applicable; his `implement` and `code-review` instructions are adapted to OpenSpec's task ledger and the uncommitted review gate. They do not require Claude marketplace dependencies. `loop` mode requires the `ocr` CLI and the `open-code-review-delegate` skill, with no OCR provider configuration. The Claude grep guard and gopls LSP registration are Claude-only; in Codex, `go-semantic-search` guides gopls use without a blocking hook.
 
 ## Update Claude Code
 
@@ -141,7 +138,7 @@ Tasks in `tasks.md` are written as **tracer bullets** (Matt's `to-tickets` disci
 A third, opt-in execution mode for `apply`, for changes you want to run with minimal check-ins. In Claude Code the autonomous work runs in a background subagent. In Codex it can use a background agent when available, or run in the current session with progress updates. Both require human approval before the final commit:
 
 - The agent works per non-manual task, in order: write failing tests (mandatory TDD), implement under the [Ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
-- Once every task's gate has passed, it reviews the whole change on Matt's Standards and Spec axes, plus [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance). Codex applies Matt's review rubric to the uncommitted diff because the upstream skill expects committed `HEAD`. Findings are merged, deduped, and route back to just the task(s) they concern. It never commits.
+- Once every task's gate has passed, it reviews the whole change on Matt's Standards and Spec axes, plus the [OpenCodeReview delegation skill](https://github.com/alibaba/open-code-review/blob/main/skills/open-code-review-delegate/SKILL.md). OCR selects files and supplies rules; the host agent reviews correctness, security, and performance without an OCR API key. Both installers make `open-code-review-delegate` available. Codex applies Matt's review rubric to the uncommitted diff because the upstream skill expects committed `HEAD`. Findings are merged, deduped, and route back to just the task(s) they concern. It never commits.
 - Clean review → the subagent reports back and your session opens a human-approval gate (a brief: time taken, review rounds, findings and fixes, a pointer to the full diff). Changes requested resume the same subagent; approval commits once, in your session, against the tree it left.
 - No fixed retry cap — only a stall detector (the same failure or finding recurring unchanged) stops the subagent short of success, leaving the working tree uncommitted for inspection.
 

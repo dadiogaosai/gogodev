@@ -6,6 +6,8 @@ set -euo pipefail
 STATUS_MATTPOCOCK="skipped"
 STATUS_MODERN_GO="skipped"
 STATUS_OPEN_CODE_REVIEW="skipped"
+STATUS_OCR_DELEGATE="skipped"
+STATUS_PONYTAIL="skipped"
 STATUS_OPENSPEC="skipped"
 STATUS_GOPLS="skipped"
 STATUS_OCR="skipped"
@@ -45,6 +47,27 @@ else
   STATUS_OPEN_CODE_REVIEW="installed"
 fi
 
+log "OpenCodeReview delegation skill"
+if [[ -f "$HOME/.claude/skills/open-code-review-delegate/SKILL.md" ||
+      -f "$HOME/.agents/skills/open-code-review-delegate/SKILL.md" ]]; then
+  echo "already installed"
+  STATUS_OCR_DELEGATE="present"
+else
+  npx --yes skills@latest add alibaba/open-code-review \
+    --skill open-code-review-delegate --global --agent claude-code --yes
+  STATUS_OCR_DELEGATE="installed"
+fi
+
+log "Ponytail plugin"
+if has_plugin "ponytail@ponytail"; then
+  echo "already installed"
+  STATUS_PONYTAIL="present"
+else
+  claude plugin marketplace add DietrichGebert/ponytail || true
+  claude plugin install ponytail@ponytail
+  STATUS_PONYTAIL="installed"
+fi
+
 log "OpenSpec CLI"
 if command -v openspec >/dev/null 2>&1; then
   echo "already installed ($(openspec --version 2>/dev/null))"
@@ -76,21 +99,23 @@ fi
 log "ocr CLI (only needed for /gogodev:apply's loop mode)"
 if command -v ocr >/dev/null 2>&1; then
   echo "already installed"
-  STATUS_OCR="present (run 'ocr config provider' / 'ocr config model' if not configured yet)"
+  STATUS_OCR="present (delegation mode needs no provider configuration)"
 else
   npm install -g @alibaba-group/open-code-review
-  STATUS_OCR="installed (run 'ocr config provider' / 'ocr config model' before first use)"
+  STATUS_OCR="installed (delegation mode needs no provider configuration)"
 fi
 
 log "Summary"
 printf '%-28s %s\n' "mattpocock-skills:" "$STATUS_MATTPOCOCK"
 printf '%-28s %s\n' "modern-go-guidelines:" "$STATUS_MODERN_GO"
 printf '%-28s %s\n' "open-code-review:" "$STATUS_OPEN_CODE_REVIEW"
+printf '%-28s %s\n' "ocr delegate skill:" "$STATUS_OCR_DELEGATE"
+printf '%-28s %s\n' "ponytail:" "$STATUS_PONYTAIL"
 printf '%-28s %s\n' "openspec CLI:" "$STATUS_OPENSPEC"
 printf '%-28s %s\n' "gopls:" "$STATUS_GOPLS"
 printf '%-28s %s\n' "ocr CLI:" "$STATUS_OCR"
 
-if [[ "$STATUS_MATTPOCOCK" == "installed" || "$STATUS_MODERN_GO" == "installed" || "$STATUS_OPEN_CODE_REVIEW" == "installed" ]]; then
+if [[ "$STATUS_MATTPOCOCK" == "installed" || "$STATUS_MODERN_GO" == "installed" || "$STATUS_OPEN_CODE_REVIEW" == "installed" || "$STATUS_OCR_DELEGATE" == "installed" || "$STATUS_PONYTAIL" == "installed" ]]; then
   echo
   echo "Restart Claude Code — newly installed plugins only load on the next session."
 fi

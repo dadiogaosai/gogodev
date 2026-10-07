@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "gogodev",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Interview ideas before OpenSpec proposals, capture settled designs, and implement OpenSpec tasks with disciplined review.",
   "author": { "name": "Waniyama" },
   "repository": "https://github.com/dadiogaosai/gogodev",

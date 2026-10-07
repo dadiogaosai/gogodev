@@ -27,11 +27,17 @@ claude plugin marketplace add JetBrains/go-modern-guidelines
 claude plugin install modern-go-guidelines@goland-claude-marketplace
 ```
 
-Do the same for Alibaba's OpenCodeReview plugin (the second parallel reviewer in `/gogodev:apply`'s `loop` mode):
+Do the same for Alibaba's OpenCodeReview plugin:
 
 ```bash
 claude plugin marketplace add alibaba/open-code-review
 claude plugin install open-code-review@open-code-review
+```
+
+For `loop` mode, check that the `open-code-review-delegate` skill is available. If missing, offer to install it globally for Claude Code:
+
+```bash
+npx --yes skills@latest add alibaba/open-code-review --skill open-code-review-delegate --global --agent claude-code --yes
 ```
 
 ## Check 2: OpenSpec CLI
@@ -74,7 +80,7 @@ If gopls is missing:
 
 gopls powers this plugin's Go integration: the LSP server registration, the go-semantic-search skill, and the Grep guard hook that enforces semantic search in Go projects.
 
-## Check 5: `ocr` CLI and a configured LLM provider (only needed for `/gogodev:apply`'s `loop` mode)
+## Check 5: `ocr` CLI for delegation mode (only needed for `/gogodev:apply`'s `loop` mode)
 
 ```bash
 command -v ocr || echo missing
@@ -86,17 +92,10 @@ If missing, ask the user before installing globally:
 npm install -g @alibaba-group/open-code-review
 ```
 
-`ocr` also needs an LLM provider configured before its first real review — this is interactive and needs an API key, so it cannot be scripted here. If the user hasn't set this up yet, tell them to run, once:
-
-```bash
-ocr config provider
-ocr config model
-```
-
-Note "skipped: `ocr` not configured yet" in the report rather than blocking on it — `loop` mode is opt-in per change, so this only needs to be done before someone actually chooses `loop`.
+The delegate skill uses the host agent for the review, so no OCR provider, model, or API key is needed. Verify that `open-code-review-delegate` is available before choosing `loop`.
 
 ## Report
 
-Print a checklist of the five dependencies with pass/fixed/skipped status.
+Print a checklist of the dependencies and the delegation skill with pass/fixed/skipped status.
 
 If anything was installed in Check 1, tell the user: **restart Claude Code** — newly installed plugins (and their skills) only load on the next session, so `/gogodev:propose` will not find `grilling` until then.
