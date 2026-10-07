@@ -10,8 +10,8 @@ In this setup, OpenSpec artifacts are written only from an idea that has **survi
 
 Before creating any new OpenSpec change or writing its artifacts (proposal, design, tasks):
 
-1. **Prefer the dedicated command**: if the user is starting a new proposal, suggest `/gogodev:propose` — the canonical flow (grilling interview → scaffold → artifacts).
-2. **If continuing anyway** (the user explicitly invoked `/opsx:propose`, or a proposal is being drafted conversationally): run the `mattpocock-skills:grilling` skill on the idea FIRST, and reach `openspec new change` and artifact-writing only after confirmed shared understanding.
+1. **Prefer the dedicated workflow**: use `gogodev-propose` in Codex or `/gogodev:propose` in Claude Code — the canonical flow (grilling interview → scaffold → artifacts).
+2. **If continuing anyway** (the user explicitly invoked `/opsx:propose`, or a proposal is being drafted conversationally): in Claude Code run `mattpocock-skills:grilling`; in Codex use the interview procedure in `gogodev-propose`. Reach `openspec new change` and artifact-writing only after confirmed shared understanding.
 3. **Write artifacts from the interview**: confirmed decisions and their rationale go into `design.md`; rejected alternatives and why go into `proposal.md`. Artifacts record only what the interview settled — a genuine gap gets one targeted follow-up question, not an invented answer.
 4. **If the interview kills the idea**, write nothing to `openspec/`.
 

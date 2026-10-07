@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "gogodev",
+  "version": "0.3.0",
+  "description": "Interview ideas before OpenSpec proposals, capture settled designs, and implement OpenSpec tasks with disciplined review.",
+  "author": { "name": "Waniyama" },
+  "repository": "https://github.com/dadiogaosai/gogodev",
+  "keywords": ["openspec", "spec-driven", "tdd", "go"],
+  "extensions": {
+    "com.openai": {
+      "hooks": [],
+      "interface": {
+        "displayName": "gogodev",
+        "shortDescription": "Engineering workflows for OpenSpec",
+        "developerName": "Waniyama",
+        "category": "Developer Tools"
+      }
+    }
+  }
+}

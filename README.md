@@ -6,7 +6,7 @@
 
 **Work Matt Pocock's way, ship OpenSpec artifacts.**
 
-A thin glue plugin for [Claude Code](https://code.claude.com) connecting [Matt Pocock's engineering skills](https://github.com/mattpocock/skills) to the [OpenSpec](https://github.com/Fission-AI/OpenSpec) spec-driven workflow — for when your team expects `openspec/` artifacts, but you'd rather think through grill-me interviews and tdd/implement loops.
+A thin glue plugin for [Claude Code](https://code.claude.com) and [Codex](https://developers.openai.com/codex) connecting Matt Pocock-style engineering workflows to the [OpenSpec](https://github.com/Fission-AI/OpenSpec) spec-driven workflow — for when your team expects `openspec/` artifacts, but you'd rather think through grilling interviews and tdd/implement loops.
 
 The rule that holds it together: **Matt's process, OpenSpec's artifacts.** Everything persistent lives in `openspec/`, indistinguishable from a by-the-book OpenSpec user. The stock `/opsx:*` tooling is never modified.
 
@@ -16,7 +16,7 @@ The rule that holds it together: **Matt's process, OpenSpec's artifacts.** Every
 - **Implementation flow** — Matt's `implement`/`tdd` skills driving OpenSpec's `tasks.md`, with the bookkeeping kept honest. A third, stricter `loop` mode adds mandatory TDD, a lint+typecheck+test gate, a dual code review, and a human-approval gate before a single commit — see below.
 - **Go layer** — gopls-first code search (enforced by a hook), JetBrains' modern Go guidelines, and gopls LSP diagnostics.
 
-## Install
+## Install in Claude Code
 
 Inside Claude Code:
 
@@ -40,7 +40,20 @@ Then:
 
 To try the plugin from a local clone instead of GitHub, point the marketplace at the checkout: `claude plugin marketplace add /path/to/gogodev`.
 
-## Update
+## Install in Codex
+
+From a local clone, register this repository's marketplace and install the plugin:
+
+```bash
+codex plugin marketplace add /path/to/gogodev
+codex plugin add gogodev@dadiogaosai
+```
+
+Start a new Codex session, then invoke the bundled skills as `$gogodev-setup`, `$gogodev-propose`, `$gogodev-capture`, and `$gogodev-apply` (for example, “Use $gogodev-propose to explore this idea”). The existing `go-semantic-search` and `grill-before-openspec` skills are included too. Codex loads these as skills, not Claude's `/gogodev:*` slash commands. Run `$gogodev-setup` in each target repository to check OpenSpec and initialize it with `openspec init --tools codex` when needed.
+
+The Codex skills contain the interview, task, and review procedures directly. They do not require Claude marketplace dependencies. `loop` mode still requires the `ocr` CLI and its configured provider. The Claude grep guard and gopls LSP registration are Claude-only; in Codex, `go-semantic-search` guides gopls use without a blocking hook.
+
+## Update Claude Code
 
 ```bash
 claude plugin marketplace update dadiogaosai   # refresh the marketplace's view of the repo
@@ -55,7 +68,11 @@ claude plugin uninstall gogodev@dadiogaosai && claude plugin install gogodev@dad
 
 Dependency plugins update independently: `claude plugin update mattpocock-skills@claude-plugins-official`, `claude plugin update modern-go-guidelines@goland-claude-marketplace`, and `claude plugin update open-code-review@open-code-review` — or update everything at once from the `/plugin` menu.
 
-## Commands
+For Codex, run `codex plugin marketplace upgrade dadiogaosai`, then start a new session. A local clone is the marketplace source, so pull repository updates there first.
+
+## Claude Code commands and Codex skills
+
+In Codex, use the matching `gogodev-propose`, `gogodev-capture`, `gogodev-apply`, and `gogodev-setup` skills. The slash command names below apply to Claude Code.
 
 | Command | What it does |
 | --- | --- |
@@ -68,7 +85,7 @@ Tasks in `tasks.md` are written as **tracer bullets** (Matt's `to-tickets` disci
 
 ## `loop` mode
 
-A third, opt-in execution mode for `/gogodev:apply`, for changes you want to run with minimal check-ins. The autonomous work runs in a background subagent, not this session — you get pulled back in only for the one human-approval checkpoint at the end:
+A third, opt-in execution mode for `apply`, for changes you want to run with minimal check-ins. In Claude Code the autonomous work runs in a background subagent. In Codex it can use a background agent when available, or run in the current session with progress updates. Both require human approval before the final commit:
 
 - The subagent works per non-manual task, in order: write failing tests (mandatory TDD), implement under the [ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
 - Once every task's gate has passed, it reviews the whole change once: `mattpocock-skills:code-review` (Standards+Spec) and [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance) run in parallel; findings are merged, deduped, and route back to just the task(s) they concern. It never commits.
@@ -83,10 +100,10 @@ A model-invocable skill (`grill-before-openspec`) steers even a habitual `/opsx:
 
 In repos with a `go.mod`, symbol questions (definitions, references, implementations) must go through gopls, not grep:
 
-- **The teeth** — a PreToolUse hook denies symbol-shaped Grep patterns (CamelCase/mixedCase identifiers, `func X` / `type X` hunts, call searches) and replies with the exact gopls commands instead. Text-shaped searches (strings, spaces, TODO markers, config keys, regex syntax) always pass. No gopls installed → the grep proceeds with a nudge toward `/gogodev:setup`, never a hard block.
+- **The teeth in Claude Code** — a PreToolUse hook denies symbol-shaped Grep patterns (CamelCase/mixedCase identifiers, `func X` / `type X` hunts, call searches) and replies with the exact gopls commands instead. Text-shaped searches (strings, spaces, TODO markers, config keys, regex syntax) always pass. No gopls installed → the grep proceeds with a nudge toward `/gogodev:setup`, never a hard block. Codex uses the skill guidance without this hook.
 - **The map** — the `go-semantic-search` skill: `gopls workspace_symbol` to find a position, then `references` / `definition` / `implementation` at it.
-- **The ambient layer** — gopls registered as an LSP server for `.go` files: diagnostics after every edit where gopls exists, gracefully skipped where it doesn't.
-- **The style layer** — JetBrains' [modern-go-guidelines](https://github.com/JetBrains/go-modern-guidelines) (`use-modern-go` skill) keeps generated Go idiomatic up to Go 1.26.
+- **The ambient layer in Claude Code** — gopls registered as an LSP server for `.go` files: diagnostics after every edit where gopls exists, gracefully skipped where it doesn't.
+- **The style layer in Claude Code** — JetBrains' [modern-go-guidelines](https://github.com/JetBrains/go-modern-guidelines) (`use-modern-go` skill) keeps generated Go idiomatic up to Go 1.26.
 
 ## Not wrapped, on purpose
 

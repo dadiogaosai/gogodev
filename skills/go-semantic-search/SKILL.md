@@ -5,9 +5,9 @@ description: Use when navigating Go code — finding where a symbol is defined, 
 
 # Go semantic search with gopls
 
-In Go projects (a `go.mod` is present), symbol questions get compiler-grade answers from gopls; grep only approximates them — it can't tell two same-named symbols apart and cannot see interface satisfaction or embedding at all. This plugin's PreToolUse hook denies symbol-shaped Grep calls in Go projects; this skill is the tool it points to.
+In Go projects (a `go.mod` is present), symbol questions get compiler-grade answers from gopls; grep only approximates them — it can't tell two same-named symbols apart and cannot see interface satisfaction or embedding at all. Claude Code's PreToolUse hook denies symbol-shaped Grep calls in Go projects. Codex uses this skill as guidance because that Claude-specific hook is not bundled for Codex.
 
-If `gopls` is not on PATH, suggest `/gogodev:setup` (it installs gopls when a Go toolchain exists).
+If `gopls` is not on PATH, suggest the `gogodev-setup` skill in Codex or `/gogodev:setup` in Claude Code (it installs gopls when a Go toolchain exists).
 
 ## The two-step workflow
 
