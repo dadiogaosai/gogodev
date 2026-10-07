@@ -6,6 +6,7 @@ set -euo pipefail
 STATUS_MATTPOCOCK="skipped"
 STATUS_MODERN_GO="skipped"
 STATUS_OPEN_CODE_REVIEW="skipped"
+STATUS_PONYTAIL="skipped"
 STATUS_OPENSPEC="skipped"
 STATUS_GOPLS="skipped"
 STATUS_OCR="skipped"
@@ -43,6 +44,16 @@ else
   claude plugin marketplace add alibaba/open-code-review || true
   claude plugin install open-code-review@open-code-review
   STATUS_OPEN_CODE_REVIEW="installed"
+fi
+
+log "Ponytail plugin"
+if has_plugin "ponytail@ponytail"; then
+  echo "already installed"
+  STATUS_PONYTAIL="present"
+else
+  claude plugin marketplace add DietrichGebert/ponytail || true
+  claude plugin install ponytail@ponytail
+  STATUS_PONYTAIL="installed"
 fi
 
 log "OpenSpec CLI"
@@ -86,11 +97,12 @@ log "Summary"
 printf '%-28s %s\n' "mattpocock-skills:" "$STATUS_MATTPOCOCK"
 printf '%-28s %s\n' "modern-go-guidelines:" "$STATUS_MODERN_GO"
 printf '%-28s %s\n' "open-code-review:" "$STATUS_OPEN_CODE_REVIEW"
+printf '%-28s %s\n' "ponytail:" "$STATUS_PONYTAIL"
 printf '%-28s %s\n' "openspec CLI:" "$STATUS_OPENSPEC"
 printf '%-28s %s\n' "gopls:" "$STATUS_GOPLS"
 printf '%-28s %s\n' "ocr CLI:" "$STATUS_OCR"
 
-if [[ "$STATUS_MATTPOCOCK" == "installed" || "$STATUS_MODERN_GO" == "installed" || "$STATUS_OPEN_CODE_REVIEW" == "installed" ]]; then
+if [[ "$STATUS_MATTPOCOCK" == "installed" || "$STATUS_MODERN_GO" == "installed" || "$STATUS_OPEN_CODE_REVIEW" == "installed" || "$STATUS_PONYTAIL" == "installed" ]]; then
   echo
   echo "Restart Claude Code — newly installed plugins only load on the next session."
 fi

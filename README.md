@@ -34,7 +34,7 @@ claude plugin install gogodev@dadiogaosai
 
 Then:
 
-1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`, Alibaba's `open-code-review`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain, and offers to install the `ocr` CLI (only needed for `loop` mode). Prefer the terminal? `./scripts/install.sh` runs the same checks outside a Claude session — handy for onboarding a new machine or CI.
+1. Run `/gogodev:setup` once. Dependencies (`mattpocock-skills`, JetBrains' `modern-go-guidelines`, Alibaba's `open-code-review`) are declared in the manifest, but marketplace resolution can be finicky — setup installs everything explicitly and is the reliable path. It also installs gopls if you have a Go toolchain, and offers to install the `ocr` CLI (only needed for `loop` mode). Prefer the terminal? `./scripts/install.sh` also installs Ponytail outside a Claude session — handy for onboarding a new machine or CI.
 2. Restart Claude Code — commands, skills, and hooks load at session start.
 3. In each repo where you'll use it, run `/gogodev:setup` again to initialize OpenSpec (`openspec init`).
 
@@ -49,7 +49,7 @@ curl -fsSLo install-codex.sh https://raw.githubusercontent.com/dadiogaosai/gogod
 bash install-codex.sh
 ```
 
-It installs gogodev, Matt Pocock's four workflow skills globally, the JetBrains and Alibaba plugins, OpenSpec, gopls when Go is available, and the `ocr` CLI. It skips dependencies already present and leaves OpenSpec initialization to each target repo. Start a new Codex session after installation. From a gogodev checkout, you can run `./scripts/install-codex.sh` instead.
+It installs gogodev, Matt Pocock's four workflow skills globally, the JetBrains, Alibaba, and Ponytail plugins, OpenSpec, gopls when Go is available, and the `ocr` CLI. It skips dependencies already present and leaves OpenSpec initialization to each target repo. Start a new Codex session after installation. From a gogodev checkout, you can run `./scripts/install-codex.sh` instead.
 
 To install the components manually, start with gogodev:
 
@@ -87,14 +87,14 @@ codex plugin marketplace add alibaba/open-code-review
 codex plugin add open-code-review-codex@open-code-review
 ```
 
-[Ponytail](https://github.com/DietrichGebert/ponytail) has an optional Codex plugin for its full, session-wide behavior:
+The installer includes [Ponytail](https://github.com/DietrichGebert/ponytail). For a manual Codex installation:
 
 ```bash
 codex plugin marketplace add DietrichGebert/ponytail
 codex plugin add ponytail@ponytail
 ```
 
-After installing Ponytail, review and trust its hooks through `/hooks` in Codex, then start a new session. Gogodev's `loop` skill includes Ponytail's minimal-code ladder even when the separate plugin is absent.
+After installing Ponytail, review and trust its hooks through `/hooks` in Codex, then start a new session. Gogodev's `loop` skill also includes Ponytail's minimal-code ladder.
 
 Start a new Codex session, then invoke the bundled skills as `$gogodev-setup`, `$gogodev-propose`, `$gogodev-capture`, and `$gogodev-apply` (for example, “Use $gogodev-propose to explore this idea”). The existing `go-semantic-search` and `grill-before-openspec` skills are included too. Codex loads these as skills, not Claude's `/gogodev:*` slash commands. Run `$gogodev-setup` in each target repository to check OpenSpec and initialize it with `openspec init --tools codex` when needed.
 

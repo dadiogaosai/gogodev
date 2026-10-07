@@ -47,6 +47,9 @@ install_plugin "JetBrains modern-go-guidelines plugin" \
 install_plugin "Alibaba OpenCodeReview plugin" \
   "open-code-review-codex@open-code-review" \
   "open-code-review" "alibaba/open-code-review"
+install_plugin "Ponytail plugin" \
+  "ponytail@ponytail" \
+  "ponytail" "DietrichGebert/ponytail"
 
 log "Matt Pocock's Codex skills"
 SKILLS_INSTALLED=0
@@ -112,5 +115,6 @@ if (( PLUGINS_INSTALLED || SKILLS_INSTALLED )); then
   echo
   echo "Start a new Codex session to load the installed plugins and skills."
 fi
+echo "In Codex, review and trust Ponytail's hooks with /hooks before using them."
 echo
 echo "Next: in each repo where you'll use gogodev, run 'openspec init --tools codex' (or \$gogodev-setup)."
