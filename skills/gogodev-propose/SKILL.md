@@ -7,7 +7,7 @@ description: Interview a new change idea thoroughly, then create and validate an
 
 First verify `openspec --version` and an OpenSpec root in the target project. If missing, use `gogodev-setup`.
 
-Interview the user before writing artifacts. Explore the repository and answer factual questions yourself. Ask one decision question at a time, state a recommended answer with its reasoning, and follow significant branches until the idea is clear. Summarize the proposed scope and decisions and get explicit confirmation. If the idea is shelved or rejected, write nothing to `openspec/` and explain why.
+Interview the user before writing artifacts. Use Matt Pocock's `grilling` skill if installed; otherwise follow its core pattern here: explore the repository and answer factual questions yourself, ask one decision question at a time with a recommended answer and reasoning, and follow significant branches until the idea is clear. Summarize the proposed scope and decisions and get explicit confirmation. If the idea is shelved or rejected, write nothing to `openspec/` and explain why. Matt's skill supplies the interview method; this skill controls when OpenSpec artifacts are written.
 
 Only after confirmation, derive a kebab-case change name from the final idea. Run `openspec new change "<name>"` and `openspec status --change "<name>" --json`. Use the returned artifact paths and dependency order. For each artifact, run `openspec instructions <artifact-id> --change "<name>"` before writing it.
 
