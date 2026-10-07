@@ -42,7 +42,16 @@ To try the plugin from a local clone instead of GitHub, point the marketplace at
 
 ## Install in Codex
 
-Install gogodev directly from GitHub in your terminal:
+Download the standalone installer and run it with Bash:
+
+```bash
+curl -fsSLo install-codex.sh https://raw.githubusercontent.com/dadiogaosai/gogodev/main/scripts/install-codex.sh
+bash install-codex.sh
+```
+
+It installs gogodev, Matt Pocock's four workflow skills globally, the JetBrains and Alibaba plugins, OpenSpec, gopls when Go is available, and the `ocr` CLI. It skips dependencies already present and leaves OpenSpec initialization to each target repo. Start a new Codex session after installation. From a gogodev checkout, you can run `./scripts/install-codex.sh` instead.
+
+To install the components manually, start with gogodev:
 
 ```bash
 codex plugin marketplace add dadiogaosai/gogodev
