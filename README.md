@@ -42,10 +42,10 @@ To try the plugin from a local clone instead of GitHub, point the marketplace at
 
 ## Install in Codex
 
-From a local clone, register this repository's marketplace and install the plugin:
+Install gogodev directly from GitHub in your terminal:
 
 ```bash
-codex plugin marketplace add /path/to/gogodev
+codex plugin marketplace add dadiogaosai/gogodev
 codex plugin add gogodev@dadiogaosai
 ```
 
@@ -68,7 +68,7 @@ claude plugin uninstall gogodev@dadiogaosai && claude plugin install gogodev@dad
 
 Dependency plugins update independently: `claude plugin update mattpocock-skills@claude-plugins-official`, `claude plugin update modern-go-guidelines@goland-claude-marketplace`, and `claude plugin update open-code-review@open-code-review` — or update everything at once from the `/plugin` menu.
 
-For Codex, run `codex plugin marketplace upgrade dadiogaosai`, then start a new session. A local clone is the marketplace source, so pull repository updates there first.
+For Codex, run `codex plugin marketplace upgrade dadiogaosai`, then start a new session.
 
 ## Claude Code commands and Codex skills
 
