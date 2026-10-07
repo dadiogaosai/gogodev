@@ -49,9 +49,47 @@ codex plugin marketplace add dadiogaosai/gogodev
 codex plugin add gogodev@dadiogaosai
 ```
 
+For Go projects, install JetBrains' modern Go guidelines plugin too:
+
+```bash
+codex plugin marketplace add JetBrains/go-modern-guidelines
+codex plugin add modern-go-guidelines@goland-codex-marketplace
+```
+
+For Matt Pocock's original interview, TDD, implementation, and review guidance, run this in each project where you want it and select Codex plus `grilling`, `tdd`, `implement`, and `code-review`:
+
+```bash
+npx skills@latest add mattpocock/skills
+```
+
+For `loop` mode, install and configure OpenCodeReview's `ocr` CLI:
+
+```bash
+npm install -g @alibaba-group/open-code-review
+ocr config provider
+ocr config model
+ocr llm test
+```
+
+Gogodev calls `ocr` directly so it can combine its findings with Matt's Standards and Spec review. Alibaba also offers an optional [Codex plugin](https://github.com/alibaba/open-code-review/blob/main/plugins/open-code-review/README.md) for standalone reviews:
+
+```bash
+codex plugin marketplace add alibaba/open-code-review
+codex plugin add open-code-review-codex@open-code-review
+```
+
+[Ponytail](https://github.com/DietrichGebert/ponytail) has an optional Codex plugin for its full, session-wide behavior:
+
+```bash
+codex plugin marketplace add DietrichGebert/ponytail
+codex plugin add ponytail@ponytail
+```
+
+After installing Ponytail, review and trust its hooks through `/hooks` in Codex, then start a new session. Gogodev's `loop` skill includes Ponytail's minimal-code ladder even when the separate plugin is absent.
+
 Start a new Codex session, then invoke the bundled skills as `$gogodev-setup`, `$gogodev-propose`, `$gogodev-capture`, and `$gogodev-apply` (for example, “Use $gogodev-propose to explore this idea”). The existing `go-semantic-search` and `grill-before-openspec` skills are included too. Codex loads these as skills, not Claude's `/gogodev:*` slash commands. Run `$gogodev-setup` in each target repository to check OpenSpec and initialize it with `openspec init --tools codex` when needed.
 
-The Codex skills contain the interview, task, and review procedures directly. They do not require Claude marketplace dependencies. `loop` mode still requires the `ocr` CLI and its configured provider. The Claude grep guard and gopls LSP registration are Claude-only; in Codex, `go-semantic-search` guides gopls use without a blocking hook.
+The Codex skills contain fallback interview, task, and review procedures. They use Matt's interview and TDD skills where applicable; his `implement` and `code-review` instructions are adapted to OpenSpec's task ledger and the uncommitted review gate. They do not require Claude marketplace dependencies. `loop` mode requires the `ocr` CLI and its configured provider. The Claude grep guard and gopls LSP registration are Claude-only; in Codex, `go-semantic-search` guides gopls use without a blocking hook.
 
 ## Update Claude Code
 
@@ -68,7 +106,13 @@ claude plugin uninstall gogodev@dadiogaosai && claude plugin install gogodev@dad
 
 Dependency plugins update independently: `claude plugin update mattpocock-skills@claude-plugins-official`, `claude plugin update modern-go-guidelines@goland-claude-marketplace`, and `claude plugin update open-code-review@open-code-review` — or update everything at once from the `/plugin` menu.
 
-For Codex, run `codex plugin marketplace upgrade dadiogaosai`, then start a new session.
+For Codex, refresh the marketplace and reinstall the plugin to replace its cached copy, then start a new session:
+
+```bash
+codex plugin marketplace upgrade dadiogaosai
+codex plugin remove gogodev@dadiogaosai
+codex plugin add gogodev@dadiogaosai
+```
 
 ## Claude Code commands and Codex skills
 
@@ -87,8 +131,8 @@ Tasks in `tasks.md` are written as **tracer bullets** (Matt's `to-tickets` disci
 
 A third, opt-in execution mode for `apply`, for changes you want to run with minimal check-ins. In Claude Code the autonomous work runs in a background subagent. In Codex it can use a background agent when available, or run in the current session with progress updates. Both require human approval before the final commit:
 
-- The subagent works per non-manual task, in order: write failing tests (mandatory TDD), implement under the [ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
-- Once every task's gate has passed, it reviews the whole change once: `mattpocock-skills:code-review` (Standards+Spec) and [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance) run in parallel; findings are merged, deduped, and route back to just the task(s) they concern. It never commits.
+- The agent works per non-manual task, in order: write failing tests (mandatory TDD), implement under the [Ponytail](https://github.com/DietrichGebert/ponytail) discipline (stop at the first rung that solves the problem — YAGNI, reuse, stdlib, native feature, existing dependency, one-liner, minimal code, in that order), then gate on lint+typecheck+tests. Tasks tagged `(manual)` are skipped.
+- Once every task's gate has passed, it reviews the whole change on Matt's Standards and Spec axes, plus [OpenCodeReview](https://github.com/alibaba/open-code-review) (`ocr review`, correctness/security/performance). Codex applies Matt's review rubric to the uncommitted diff because the upstream skill expects committed `HEAD`. Findings are merged, deduped, and route back to just the task(s) they concern. It never commits.
 - Clean review → the subagent reports back and your session opens a human-approval gate (a brief: time taken, review rounds, findings and fixes, a pointer to the full diff). Changes requested resume the same subagent; approval commits once, in your session, against the tree it left.
 - No fixed retry cap — only a stall detector (the same failure or finding recurring unchanged) stops the subagent short of success, leaving the working tree uncommitted for inspection.
 
@@ -103,7 +147,7 @@ In repos with a `go.mod`, symbol questions (definitions, references, implementat
 - **The teeth in Claude Code** — a PreToolUse hook denies symbol-shaped Grep patterns (CamelCase/mixedCase identifiers, `func X` / `type X` hunts, call searches) and replies with the exact gopls commands instead. Text-shaped searches (strings, spaces, TODO markers, config keys, regex syntax) always pass. No gopls installed → the grep proceeds with a nudge toward `/gogodev:setup`, never a hard block. Codex uses the skill guidance without this hook.
 - **The map** — the `go-semantic-search` skill: `gopls workspace_symbol` to find a position, then `references` / `definition` / `implementation` at it.
 - **The ambient layer in Claude Code** — gopls registered as an LSP server for `.go` files: diagnostics after every edit where gopls exists, gracefully skipped where it doesn't.
-- **The style layer in Claude Code** — JetBrains' [modern-go-guidelines](https://github.com/JetBrains/go-modern-guidelines) (`use-modern-go` skill) keeps generated Go idiomatic up to Go 1.26.
+- **The style layer** — JetBrains' [modern-go-guidelines](https://github.com/JetBrains/go-modern-guidelines) (`use-modern-go` skill) is available in both Claude Code and Codex. Install its Codex plugin using the commands above; `$gogodev-apply` uses it for Go changes when available.
 
 ## Not wrapped, on purpose
 
