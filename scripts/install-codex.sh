@@ -109,7 +109,7 @@ else
   npm install -g @alibaba-group/open-code-review
   echo "installed"
 fi
-echo "Configure it with 'ocr config provider' and 'ocr config model' before using loop mode."
+echo "Delegation mode uses the host agent; no OCR provider or model configuration is needed for loop mode."
 
 if (( PLUGINS_INSTALLED || SKILLS_INSTALLED )); then
   echo
